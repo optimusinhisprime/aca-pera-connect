@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { generateOptIntoAssetTxns, optInTransaction } from "./utils";
-import algosdk from "algosdk";
-
-let algod: any;
-try {
-  algod = new algosdk.Algodv2(
-    "",
-    "<https://node.testnet.algoexplorerapi.io/>",
-    443
-  );
-} catch (error) {
-  console.error(error);
-}
+import { optInTransaction } from "./utils";
 
 export const peraWallet = new PeraWalletConnect();
+
 function App() {
   const [accountAddress, setAccountAddress] = useState<string | null>(null);
   const isConnectedToPeraWallet = !!accountAddress;
@@ -72,7 +61,13 @@ function App() {
       {isConnectedToPeraWallet && (
         <>
           <button
-            onClick={() => optInTransaction(accountAddress, peraWallet, algod)}
+            onClick={() =>
+              optInTransaction({
+                assetID: 10458941,
+                initiatorAddr: accountAddress,
+                peraWalletInstance: peraWallet,
+              })
+            }
           >
             OptIn to USDC
           </button>

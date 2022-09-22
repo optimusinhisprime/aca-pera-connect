@@ -1,14 +1,17 @@
 import algosdk from "algosdk";
 import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalletModels";
+const algod = new algosdk.Algodv2(
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "https://node.testnet.algoexplorerapi.io",
+  443
+);
 
 async function generateOptIntoAssetTxns({
   assetID,
   initiatorAddr,
-  algod,
 }: {
   assetID: number;
   initiatorAddr: string;
-  algod: any;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await algod.getTransactionParams().do();
   const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -25,11 +28,9 @@ async function generateOptIntoAssetTxns({
 async function generatePaymentTxns({
   to,
   initiatorAddr,
-  algod,
 }: {
   to: string;
   initiatorAddr: string;
-  algod: any;
 }) {
   const suggestedParams = await algod.getTransactionParams().do();
 
@@ -47,12 +48,10 @@ async function generateAssetTransferTxns({
   to,
   assetID,
   initiatorAddr,
-  algod,
 }: {
   to: string;
   assetID: number;
   initiatorAddr: string;
-  algod: any;
 }) {
   const suggestedParams = await algod.getTransactionParams().do();
 
@@ -67,23 +66,45 @@ async function generateAssetTransferTxns({
   return [{ txn, signers: [initiatorAddr] }];
 }
 
-async function optInTransaction(
-  accountAddress: string,
-  peraWalletInstance: any,
-  algod: any
-) {
-  const txGroups = await generateOptIntoAssetTxns({
-    assetID: 10458941,
-    initiatorAddr: accountAddress,
-    algod,
-  });
-
+async function optInTransaction({
+  assetID,
+  initiatorAddr,
+  peraWalletInstance,
+}: {
+  assetID: number;
+  initiatorAddr: string;
+  peraWalletInstance: any;
+}) {
   try {
-    await peraWalletInstance.signTransaction([txGroups]);
+    const data = {
+      assetId: assetID,
+      walletAddress: initiatorAddr,
+    };
+    const JSONdata = JSON.stringify(data);
+
+    const endpoint = "http://localhost:3001/api/v1/agent/opt-in";
+
+    // Form the request for sending data to the server.
+    const options = {
+      // The method is POST because we are sending data.
+      method: "POST",
+      // Tell the server we're sending JSON.s
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSONdata,
+    };
+
+    const response = await fetch(endpoint, options);
+    const result = await response.json();
+
+    const txGroup = [{ txn: result.transaction, signers: [initiatorAddr] }];
+
+    await peraWalletInstance.signTransaction([txGroup]);
     console.log("Transaction Signed.");
+    alert("Transaction Signed.");
   } catch (error) {
     console.log("Couldn't sign Opt-in txns", error);
-    alert("Couldnt sign Opt-in txns.");
   }
 }
 
