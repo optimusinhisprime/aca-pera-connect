@@ -4,18 +4,22 @@ import { SignerTransaction } from "@perawallet/connect/dist/util/model/peraWalle
 async function generateOptIntoAssetTxns({
   assetID,
   initiatorAddr,
-  algod,
 }: {
   assetID: number;
   initiatorAddr: string;
-  algod: any;
 }): Promise<SignerTransaction[]> {
+  const algod = new algosdk.Algodv2(
+    "",
+    "https://node.testnet.algoexplorerapi.io/",
+    443
+  );
+  const amount = 100000;
   const suggestedParams = await algod.getTransactionParams().do();
   const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: initiatorAddr,
     assetIndex: assetID,
-    amount: 0,
+    amount: amount,
     suggestedParams,
   });
 
@@ -75,11 +79,11 @@ async function optInTransaction(
   const txGroups = await generateOptIntoAssetTxns({
     assetID: 10458941,
     initiatorAddr: accountAddress,
-    algod,
   });
 
   try {
     await peraWalletInstance.signTransaction([txGroups]);
+    console.log(txGroups)
     console.log("Transaction Signed.");
   } catch (error) {
     console.log("Couldn't sign Opt-in txns", error);

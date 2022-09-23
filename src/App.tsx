@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { generateOptIntoAssetTxns, optInTransaction } from "./utils";
+import { walletSignTransaction } from "./walletConnect";
 import algosdk from "algosdk";
 
 let algod: any;
 try {
-  algod = new algosdk.Algodv2(
-    "",
-    "<https://node.testnet.algoexplorerapi.io/>",
-    443
-  );
 } catch (error) {
   console.error(error);
 }
@@ -75,6 +71,10 @@ function App() {
             onClick={() => optInTransaction(accountAddress, peraWallet, algod)}
           >
             OptIn to USDC
+          </button>
+
+          <button onClick={() => walletSignTransaction(accountAddress)}>
+            Transaction
           </button>
         </>
       )}
