@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { optInTransaction } from "./utils";
+import { optInTransaction, optInContractTransaction } from "./utils";
 
 export const peraWallet = new PeraWalletConnect();
 
 function App() {
   const [accountAddress, setAccountAddress] = useState<string | null>(null);
   const isConnectedToPeraWallet = !!accountAddress;
+  const [loanId, setLoanId] = useState<number>(0);
+
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+
+    optInContractTransaction({
+      contractID: loanId,
+      initiatorAddr: accountAddress || "",
+      peraWalletInstance: peraWallet,
+    });
+  };
+
+  const handleChange = async (event: any) => {
+    setLoanId(event.target.value);
+  };
 
   useEffect(() => {
     // Reconnect to the session when the component is mounted
@@ -30,6 +45,31 @@ function App() {
         peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
 
         setAccountAddress(newAccounts[0]);
+        //send account address to the backend for new wallet entry.
+
+        const data = { walletAddress: newAccounts[0] };
+        const myHeaders = new Headers();
+        myHeaders.append(
+          "Authorization",
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMzg1OGVlYS1lZDc5LTRiZGQtOTQ1YS01MDc1ODdiZDIxNzAiLCJmaXJzdE5hbWUiOiJQaG9tb2xvIiwibGFzdE5hbWUiOiJQaGlyaSIsImVtYWlsIjoicGhvbW9sb0BhZnJpY2Fjb2RlLmFjYWRlbXkiLCJwaG9uZU51bWJlciI6IisyNjc3NDAwODI4MSIsInVzZXJUeXBlIjoiUmVndWxhciIsImlhdCI6MTY2NTA2ODIxNSwiZXhwIjoxNjY1MTExNDE1fQ.iCnd_AY2iXt14XLd6RfkyWmt9HWMkEqa4YuWrQmZfE4"
+        );
+        myHeaders.append("Content-Type", "application/json");
+
+        fetch(
+          "http://backend-env.us-east-2.elasticbeanstalk.com/api/v1/agents/02f515bc-202f-42a2-b303-769430808f55/wallet-connection",
+          {
+            method: "POST",
+            headers: myHeaders,
+            body: JSON.stringify(data),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -57,7 +97,7 @@ function App() {
       >
         {isConnectedToPeraWallet ? "Disconnect" : "Connect to Pera Wallet"}
       </button>
-
+      <br />
       {isConnectedToPeraWallet && (
         <>
           <button
@@ -73,6 +113,18 @@ function App() {
           </button>
         </>
       )}
+      <br />
+      <div>
+        {isConnectedToPeraWallet && (
+          <form onSubmit={handleSubmit}>
+            <label>
+              Enter Loan Id to Process:
+              <input type="text" name="loanId" onChange={handleChange} />
+            </label>
+            <input type="submit" value="Submit" />
+          </form>
+        )}
+      </div>
     </div>
   );
 }
