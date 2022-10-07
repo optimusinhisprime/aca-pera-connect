@@ -128,7 +128,7 @@ async function generateOptIntoContractTxns({
   let optInTxn = algosdk.makeApplicationOptInTxn(
     initiatorAddr,
     suggestedParams,
-    contractID
+    Number(contractID)
   );
   return [{ txn: optInTxn, signers: [initiatorAddr] }];
 }
