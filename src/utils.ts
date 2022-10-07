@@ -92,7 +92,7 @@ async function optInTransaction({
     const myHeaders = new Headers();
     myHeaders.append(
       "Authorization",
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMzg1OGVlYS1lZDc5LTRiZGQtOTQ1YS01MDc1ODdiZDIxNzAiLCJmaXJzdE5hbWUiOiJQaG9tb2xvIiwibGFzdE5hbWUiOiJQaGlyaSIsImVtYWlsIjoicGhvbW9sb0BhZnJpY2Fjb2RlLmFjYWRlbXkiLCJwaG9uZU51bWJlciI6IisyNjc3NDAwODI4MSIsInVzZXJUeXBlIjoiUmVndWxhciIsImlhdCI6MTY2NTA2ODIxNSwiZXhwIjoxNjY1MTExNDE1fQ.iCnd_AY2iXt14XLd6RfkyWmt9HWMkEqa4YuWrQmZfE4"
+      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMmY1MTViYy0yMDJmLTQyYTItYjMwMy03Njk0MzA4MDhmNTUiLCJmaXJzdE5hbWUiOiJXaWxsIiwibGFzdE5hbWUiOiJLd2VsYWdvYmUiLCJlbWFpbCI6IndpbGxAYWZyaWNhY29kZS5hY2FkZW15IiwicGhvbmVOdW1iZXIiOiIrMjY3NzQwMDgyNzQiLCJ1c2VyVHlwZSI6IlJlZ3VsYXIiLCJpYXQiOjE2NjUxMjQxODcsImV4cCI6MTY2NTE0NTc4N30.dCe8ZWF70JGuL96DKeiUAcbuG2cnaFYOtR9BagZ-q7g"
     );
     myHeaders.append("Content-Type", "application/json");
 
@@ -120,7 +120,7 @@ async function generateOptIntoContractTxns({
   contractID,
   initiatorAddr,
 }: {
-  contractID: number;
+  contractID: any;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await algod.getTransactionParams().do();
@@ -138,7 +138,7 @@ async function optInContractTransaction({
   initiatorAddr,
   peraWalletInstance,
 }: {
-  contractID: number;
+  contractID: any;
   initiatorAddr: string;
   peraWalletInstance: any;
 }) {
@@ -148,7 +148,9 @@ async function optInContractTransaction({
       initiatorAddr: initiatorAddr,
     });
     await peraWalletInstance.signTransaction([txGroups]);
-  } catch (error) {}
+  } catch (error) {
+    console.log("Couldn't sign Opt-in txns", error);
+  }
 }
 
 export {
