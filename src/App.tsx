@@ -118,7 +118,7 @@ function App() {
         {isConnectedToPeraWallet && (
           <form onSubmit={handleSubmit}>
             <label>
-              Enter Loan Id to Process:
+              Enter Contract Id to Process:
               <input type="text" name="loanId" onChange={handleChange} />
             </label>
             <input type="submit" value="Submit" />
